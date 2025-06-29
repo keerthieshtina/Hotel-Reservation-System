@@ -1,0 +1,221 @@
+package com.packages.importexample;
+import java.io.Serializable;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.Scanner;
+import java.util.List;
+ class Room implements Serializable {
+    private int roomNumber;
+    private String type;                        // when we use private ,other classes can't access these keywords
+    private double price;
+    private boolean isBooked;
+    public Room(int roomNumber, String type, double price) {
+        this.roomNumber = roomNumber;
+        this.type = type;
+        this.price = price;
+        this.isBooked = false;
+    }
+    public int getRoomNumber() { 
+    	return roomNumber; }
+    public String getType() {
+    	return type; }
+    public double getPrice() {          // use public setter/getter methods to use private variables outside the class
+    	return price; }           
+    public boolean isBooked() {
+    	return isBooked; }
+    public void book() { 
+    	isBooked = true; }
+    public void cancel() {
+    	isBooked = false; }
+    @Override
+    public String toString() {
+        return roomNumber + " | " + type + " | ₹" + price + " | " + (isBooked ? "Booked" : "Available");
+   }}
+ class Booking implements Serializable{
+	private int bookingId;
+	private String userName;
+	private Room room;
+	public Booking(int bookingid,String username,Room room) {
+		this.bookingId=bookingid;
+		this.userName=username;
+		this.room=room;
+	}
+	public int getBookingId() {
+		return bookingId;
+	}
+	public String getUserName() {
+		return userName;
+	}public Room getRoom() {
+		return room;
+	}
+	@Override
+	public String toString() {
+		return "Booking ID : "+bookingId + "\nName : "+userName+"\nRoom :"+room;
+	}
+}
+ class Users{
+	 private String name;
+	 public Users(String name) {
+		 this.name=name;
+	 }
+	 public String getName() {
+		 return name;
+	 }
+ }
+ class Hotel{
+	private List<Room> rooms;
+	private List<Booking> bookings;
+	private int bookingCounter=1000;
+	public Hotel() {
+		rooms=FileManager.loadRooms();
+		bookings=FileManager.loadBookings();
+	}
+	public void listAvailableRooms (String type) {
+	for (Room r:rooms) {
+	if(r.getType().equalsIgnoreCase (type) && !r.isBooked()) {
+		 System.out.println(r);
+    }
+   }
+  }
+public Booking bookRoom (Users user,String type) {
+   for (Room r:rooms) {
+     if(r.getType().equalsIgnoreCase (type) && !r.isBooked()) {
+    r.book();
+     Booking b = new Booking(bookingCounter++,user.getName(), r);
+     bookings.add(b);
+     saveData();
+     return b;
+      }
+	}
+    return null; // No room available
+    }
+	public boolean cancelBooking(int bookingId) {
+    for (Booking b:bookings) {
+  if (b.getBookingId() ==bookingId) {
+   b.getRoom().cancel(); // Free the room
+   bookings.remove(b); // Remove the booking
+   saveData(); 
+     return true;
+	}
+	}
+    return false;
+    }
+	public void viewBookings() {
+		for (Booking b:bookings) {
+         System.out.println(b);
+         System.out.println("-----"); }
+      }
+    private void saveData() {
+    	FileManager.saveRooms (rooms);
+	FileManager.saveBookings (bookings); }
+	}
+ class FileManager {
+	    private static final String ROOM_FILE = "rooms.dat";
+	    private static final String BOOKING_FILE = "bookings.dat";
+
+	    public static List<Room> loadRooms() {
+	        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(ROOM_FILE))) {
+	            return (List<Room>) in.readObject();
+	        } catch (Exception e) {
+	            return defaultRooms(); // first-time run
+	        }
+	    }
+
+	    public static List<Booking> loadBookings() {
+	        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(BOOKING_FILE))) {
+	            return (List<Booking>) in.readObject();
+	        } catch (Exception e) {
+	            return new ArrayList<>();
+	        }
+	    }
+
+	    public static void saveRooms(List<Room> rooms) {
+	        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(ROOM_FILE))) {
+	            out.writeObject(rooms);
+	        } catch (IOException e) {
+	            System.out.println("Error saving rooms.");
+	        }
+	    }
+
+	    public static void saveBookings(List<Booking> bookings) {
+	        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(BOOKING_FILE))) {
+	            out.writeObject(bookings);
+	        } catch (IOException e) {
+	            System.out.println("Error saving bookings.");
+	        }
+	    }
+
+	    private static List<Room> defaultRooms() {
+	        List<Room> list = new ArrayList<>();
+	        list.add(new Room(101, "Standard", 1500));
+	        list.add(new Room(102, "Standard", 1500));
+	        list.add(new Room(201, "Deluxe", 2500));
+	        list.add(new Room(202, "Deluxe", 2500));
+	        list.add(new Room(301, "Suite", 4000));
+	        list.add(new Room(302, "Suite", 4000));
+	        saveRooms(list);
+	        return list;
+	    }
+	}
+public class HotelMain {
+		    public static void main(String[] args) {
+		        Scanner scanner = new Scanner(System.in);
+		        Hotel hotel = new Hotel();
+		        while (true) {
+		            System.out.println("\n--- Hotel Reservation System ---");
+		            System.out.println("1. View Available Rooms");
+		            System.out.println("2. Book Room");
+		            System.out.println("3. Cancel Booking");
+		            System.out.println("4. View All Bookings");
+		            System.out.println("5. Exit");
+		            System.out.print("Choose an option: ");
+		            int choice = scanner.nextInt();
+		            scanner.nextLine(); // consume newline
+		            switch (choice) {
+		            case 1:      System.out.print("Enter room type (Standard/Deluxe/Suite): ");
+		                        String type = scanner.nextLine();
+		                      hotel.listAvailableRooms(type);
+		                        break;
+		                case 2:
+		                    System.out.print("Enter your name: ");
+		                    String name = scanner.nextLine();
+		                    Users user = new Users(name);
+
+		                    System.out.print("Enter room type (Standard/Deluxe/Suite): ");
+		                    String roomType = scanner.nextLine();
+
+		                    Booking booking = hotel.bookRoom(user, roomType);
+		                    if (booking != null) {
+		                        System.out.println("Booking successful!");
+		                        System.out.println(booking);   // when we print object ,it automatically calls toString() inside that Booking class
+		                    } else {
+		                        System.out.println("No available rooms of that type.");
+		                    }
+		                    break;
+		                case 3:
+		                    System.out.print("Enter Booking ID to cancel: ");
+		                    int bookingId = scanner.nextInt();
+		                    boolean canceled = hotel.cancelBooking(bookingId);
+		                    if (canceled) {
+		                        System.out.println("Booking canceled successfully.");
+		                    } else {
+		                        System.out.println("Booking ID not found.");
+		                    }
+		                    break;
+		                case 4:
+		                    hotel.viewBookings();
+		                    break;
+		                case 5:
+		                    System.out.println("Exiting system. bye!");
+		                    return;
+		                default:
+		                    System.out.println("Invalid option. Try again.");
+		            }}
+	}
+}
+
+ 
+
+ 
+
+	 
