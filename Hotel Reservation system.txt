@@ -6,7 +6,7 @@ import java.util.Scanner;
 import java.util.List;
  class Room implements Serializable {
     private int roomNumber;
-    private String type;                        // when we use private ,other classes can't access these keywords
+    private String type;                       
     private double price;
     private boolean isBooked;
     public Room(int roomNumber, String type, double price) {
@@ -19,7 +19,7 @@ import java.util.List;
     	return roomNumber; }
     public String getType() {
     	return type; }
-    public double getPrice() {          // use public setter/getter methods to use private variables outside the class
+    public double getPrice() {          
     	return price; }           
     public boolean isBooked() {
     	return isBooked; }
@@ -144,7 +144,6 @@ public Booking bookRoom (Users user,String type) {
 	            System.out.println("Error saving bookings.");
 	        }
 	    }
-
 	    private static List<Room> defaultRooms() {
 	        List<Room> list = new ArrayList<>();
 	        list.add(new Room(101, "Standard", 1500));
@@ -172,11 +171,11 @@ public class HotelMain {
 		            int choice = scanner.nextInt();
 		            scanner.nextLine(); // consume newline
 		            switch (choice) {
-		            case 1:      System.out.print("Enter room type (Standard/Deluxe/Suite): ");
-		                        String type = scanner.nextLine();
-		                      hotel.listAvailableRooms(type);
-		                        break;
-		                case 2:
+		            case 1: System.out.print("Enter room type (Standard/Deluxe/Suite): ");
+		                    String type = scanner.nextLine();
+		                    hotel.listAvailableRooms(type);
+		                    break;
+		            case 2:
 		                    System.out.print("Enter your name: ");
 		                    String name = scanner.nextLine();
 		                    Users user = new Users(name);
@@ -192,7 +191,7 @@ public class HotelMain {
 		                        System.out.println("No available rooms of that type.");
 		                    }
 		                    break;
-		                case 3:
+		            case 3:
 		                    System.out.print("Enter Booking ID to cancel: ");
 		                    int bookingId = scanner.nextInt();
 		                    boolean canceled = hotel.cancelBooking(bookingId);
@@ -202,13 +201,13 @@ public class HotelMain {
 		                        System.out.println("Booking ID not found.");
 		                    }
 		                    break;
-		                case 4:
+		            case 4:
 		                    hotel.viewBookings();
 		                    break;
-		                case 5:
+		            case 5:
 		                    System.out.println("Exiting system. bye!");
 		                    return;
-		                default:
+		            default:
 		                    System.out.println("Invalid option. Try again.");
 		            }}
 	}
